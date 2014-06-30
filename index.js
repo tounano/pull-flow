@@ -42,12 +42,15 @@ var serial = pull.Through(function (read) {
 
   return function (end, cb) {
     queue.push({end: end, cb: cb})
-    if(queue.length > 1) return
+    if(queue.length > 1 || inFlight) return
 
     ;(function drain() {
-      read(queue[0].end, function (end, data) {
-        var cb = queue.shift().cb
+      if (inFlight) return;
+      inFlight = queue.shift()
+      read(inFlight.end, function (end, data) {
+        var cb = inFlight.cb
         cb(end, data)
+        inFlight = null;
         if(queue.length) drain()
       })
     })()
