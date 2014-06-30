@@ -11,7 +11,7 @@ var parallel = pull.Through(function (read, hwm, lwm) {
 
     ;(function drain() {
       if((output.length || ended) && cbs.length)
-        cbs.shift() (output.length ? null : ended, output.shift())
+        cbs.shift() (output.length ? output[0].end : ended, output.shift().data)
       else if(!ended){
         var m = n + output.length
         if(m >= lwm) return
@@ -26,8 +26,8 @@ var parallel = pull.Through(function (read, hwm, lwm) {
             async = false
             n--
             //console.log('--->', n, end, data)
-            if(!(ended = ended || end))
-              output.push(data)
+            if(!(end === true && (ended = ended || end)))
+              output.push({end:end, data:data})
             drain()
           })
         }
