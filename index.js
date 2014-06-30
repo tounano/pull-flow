@@ -10,9 +10,10 @@ var parallel = pull.Through(function (read, hwm, lwm) {
     cbs.push(cb)
 
     ;(function drain() {
-      if((output.length || ended) && cbs.length)
-        cbs.shift() (output.length ? output[0].end : ended, output.shift().data)
-      else if(!ended){
+      if((output.length || ended) && cbs.length) {
+        var inFlight = output.shift();
+        cbs.shift() (inFlight ? inFlight.end : ended, inFlight && inFlight.data)
+      } else if(!ended){
         var m = n + output.length
         if(m >= lwm) return
 
@@ -26,8 +27,8 @@ var parallel = pull.Through(function (read, hwm, lwm) {
             async = false
             n--
             //console.log('--->', n, end, data)
-            if(!(end === true && (ended = ended || end)))
-              output.push({end:end, data:data})
+            if(!(end === true && (ended = ended || end))) {
+              output.push({end:end, data:data})}
             drain()
           })
         }
